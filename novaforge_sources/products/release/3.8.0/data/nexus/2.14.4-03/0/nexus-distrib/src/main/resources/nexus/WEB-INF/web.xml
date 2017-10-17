@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Sonatype Nexus (TM) Open Source Version
+    Copyright (c) 2007-2012 Sonatype, Inc.
+    All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
+
+    This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
+    which accompanies this distribution and is available at http://www.eclipse.org/legal/epl-v10.html.
+
+    Sonatype Nexus (TM) Professional Version is available from Sonatype, Inc. "Sonatype" and "Sonatype Nexus" are trademarks
+    of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
+    Eclipse Foundation. All other trademarks are the property of their respective owners.
+
+-->
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+ <display-name>Nexus Repository Manager 2.14.4-03</display-name>
+  <listener>
+    <listener-class>org.jasig.cas.client.session.SingleSignOutHttpSessionListener</listener-class>
+  </listener>
+
+  <listener>
+    <listener-class>org.sonatype.nexus.webapp.WebappBootstrap</listener-class>
+  </listener>
+<!--
+ <listener>
+    <listener-class>org.sonatype.nexus.web.PlexusContainerContextListener</listener-class>
+  </listener>
+  <listener>
+    <listener-class>org.sonatype.nexus.web.NexusGuiceContextListener</listener-class>
+  </listener>
+  <listener>
+    <listener-class>org.sonatype.nexus.web.LogConfigListener</listener-class>
+  </listener>
+
+  <listener>
+    <listener-class>org.sonatype.nexus.web.NexusBooterListener</listener-class>
+  </listener>
+-->
+
+ <!--
+  <filter>
+    <filter-name>CAS Single Sign Out Filter</filter-name>
+    <filter-class>org.jasig.cas.client.session.SingleSignOutFilter</filter-class>
+  </filter>
+  <filter>
+    <filter-name>CAS Authentication Filter</filter-name>
+    <filter-class>org.jasig.cas.client.authentication.AuthenticationFilter</filter-class>
+    <init-param>
+      <param-name>casServerLoginUrl</param-name>
+      <param-value>https://novadevfgr:443/cas/login</param-value>
+    </init-param>
+    <init-param>
+      <param-name>service</param-name>
+      <param-value>https://novadevfgr/nexus-default/nexus/service/local/authentication/cas</param-value>
+    </init-param>
+  </filter>
+  <filter>
+    <filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>
+    <filter-class>org.jasig.cas.client.util.HttpServletRequestWrapperFilter</filter-class>
+  </filter>
+-->
+  <filter>
+    <filter-name>guiceFilter</filter-name>
+    <filter-class>org.sonatype.nexus.web.internal.NexusGuiceFilter</filter-class>
+  </filter>
+ <!--
+  <filter-mapping>
+    <filter-name>CAS Single Sign Out Filter</filter-name>
+    <url-pattern>/service/local/authentication/cas</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>CAS Authentication Filter</filter-name>
+    <url-pattern>/service/local/authentication/cas</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>
+    <url-pattern>/service/local/authentication/cas</url-pattern>
+  </filter-mapping>
+-->
+  <filter-mapping>
+    <filter-name>guiceFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+   <dispatcher>REQUEST</dispatcher>
+    <dispatcher>ERROR</dispatcher>
+  </filter-mapping>
+   <error-page>
+    <location>/error.html</location>
+  </error-page>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+
+</web-app>

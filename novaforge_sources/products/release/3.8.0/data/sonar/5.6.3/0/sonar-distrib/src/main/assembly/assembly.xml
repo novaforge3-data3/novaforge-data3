@@ -1,0 +1,82 @@
+<!--
+ * NovaForge(TM) is a web-based forge offering a Collaborative Development and 
+ * Project Management Environment.
+ *
+ * Copyright (C) 2007-2012  BULL SAS
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/.
+-->
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+
+	<id>bin</id>
+	<formats>
+		<format>tar.gz</format>
+	</formats>
+	<includeBaseDirectory>true</includeBaseDirectory>
+
+	<fileSets>
+		<fileSet>
+			<outputDirectory />
+			<directory>${sonar.bundle.dir}</directory>
+		</fileSet>
+	</fileSets>
+
+	<files>
+		<file>
+			<source>${basedir}/src/main/patches/NOVAFORGE-README.txt</source>
+			<outputDirectory />
+		</file>
+	</files>
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>extensions/plugins</outputDirectory>
+			<useStrictFiltering>true</useStrictFiltering>
+			<includes>
+				<include>org.codehaus.sonar-plugins:sonar-cas-plugin</include>
+				<include>org.codehaus.sonar-plugins.l10n:sonar-l10n-fr-plugin</include>
+				<include>org.sonarsource.java:sonar-java-plugin</include>
+				<include>org.sonarsource.javascript:sonar-javascript-plugin</include>
+				<include>org.sonarsource.pmd:sonar-pmd-plugin</include>
+				<!--  
+				<include>org.sonarsource.checkstyle:sonar-checkstyle-plugin</include>
+				<include>org.sonarsource.sonar-findbugs-plugin:sonar-findbugs-plugin</include>
+				-->
+			</includes>
+			<outputFileNameMapping>${artifact.artifactId}-${artifact.version}.${artifact.extension}</outputFileNameMapping>
+		</dependencySet>
+		<dependencySet>
+			<outputDirectory>lib</outputDirectory>
+			<useStrictFiltering>true</useStrictFiltering>
+			<includes>
+				<include>org.jasig.cas.client:cas-client-core</include>
+				<include>commons-codec:commons-codec</include>
+				<include>commons-httpclient:commons-httpclient</include>
+				<include>commons-logging:commons-logging</include>
+				<include>xml-security:xmlsec</include>
+			</includes>
+			<outputFileNameMapping>${artifact.artifactId}-${artifact.version}.${artifact.extension}</outputFileNameMapping>
+		</dependencySet>
+		<!--  
+		<dependencySet>
+			<outputDirectory>lib/jdbc/mariadb</outputDirectory>
+			<useStrictFiltering>true</useStrictFiltering>
+			<includes>
+				<include>org.mariadb.jdbc:mariadb-java-client</include>
+			</includes>
+			<outputFileNameMapping>${artifact.artifactId}-${artifact.version}.${artifact.extension}</outputFileNameMapping>
+		</dependencySet>
+		-->
+	</dependencySets>
+</assembly>

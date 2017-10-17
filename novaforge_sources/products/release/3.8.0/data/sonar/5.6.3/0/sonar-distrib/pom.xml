@@ -1,0 +1,328 @@
+<!-- * NovaForge(TM) is a web-based forge offering a Collaborative Development 
+	and * Project Management Environment. * * Copyright (C) 2007-2012 BULL SAS 
+	* * This program is free software: you can redistribute it and/or modify 
+	* it under the terms of the GNU Affero General Public License as * published 
+	by the Free Software Foundation, either version 3 of the * License, or (at 
+	your option) any later version. * * This program is distributed in the hope 
+	that it will be useful, * but WITHOUT ANY WARRANTY; without even the implied 
+	warranty of * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+	* GNU Affero General Public License for more details. * * You should have 
+	received a copy of the GNU Affero General Public License * along with this 
+	program. If not, see http://www.gnu.org/licenses/. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.novaforge.products.data</groupId>
+		<artifactId>sonar</artifactId>
+		<version>5.6.3</version>
+	</parent>
+
+	<artifactId>sonar-distrib</artifactId>
+	<!-- we need to specify jar packaging in order to compile java classes -->
+	<packaging>jar</packaging>
+	<name>NovaForge(tm) :: Products :: 3.8.0 :: Datas :: Sonar :: 5.6.3 :: Distribution</name>
+	<description>NovaForge(tm) :: Products :: 3.8.0 :: Datas :: Sonar :: 5.6.3 :: Distribution</description>
+	<properties>
+		<patches.dir>${basedir}/src/main/patches</patches.dir>
+		<sonar.unzip.dir>${project.build.directory}/generated-resources</sonar.unzip.dir>
+		<sonar.bundle.dir>${sonar.unzip.dir}/sonarqube-${sonar.version}</sonar.bundle.dir>
+		<sonar.temp.dir>${sonar.bundle.dir}/temp</sonar.temp.dir>
+		<sonar.db.temp.dir>${sonar.temp.dir}/sonar-db</sonar.db.temp.dir>
+		<sonar.server.dir>${sonar.bundle.dir}/web</sonar.server.dir>
+		<sonar.webinf.dir>${sonar.server.dir}/WEB-INF</sonar.webinf.dir>
+		<sonar.db.jar.lib>${sonar.bundle.dir}/lib/server/sonar-db-${sonar.version}.jar</sonar.db.jar.lib>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<inherited>false</inherited>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.ant</groupId>
+						<artifactId>ant-nodeps</artifactId>
+						<version>1.8.1</version>
+					</dependency>
+					<dependency>
+						<groupId>jakarta-regexp</groupId>
+						<artifactId>jakarta-regexp</artifactId>
+						<version>1.4</version>
+					</dependency>
+					<dependency>
+						<groupId>ant</groupId>
+						<artifactId>ant-jakarta-regexp</artifactId>
+						<version>1.6.1</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<id>download-sonar</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<unzip
+									src="${basedir}/src/main/resources/sonarqube-${sonar.version}.zip"
+									dest="${sonar.unzip.dir}/" />
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>unzip-sonar-db</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<unzip
+									src="${sonar.db.jar.lib}"
+									dest="${sonar.db.temp.dir}/" />
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>patch-sonar-classes</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<copy
+									file="${project.build.directory}/classes/org/sonar/server/startup/RegisterPermissionTemplates.class"
+									todir="${sonar.webinf.dir}/classes/org/sonar/server/startup/"
+									overwrite="true" />
+								<copy
+									file="${project.build.directory}/classes/org/sonar/db/DatabaseChecker.class"
+									todir="${sonar.webinf.dir}/classes/org/sonar/db/"
+									overwrite="true" />
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>patch-sonar-ruby</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<copy
+									file="${patches.dir}/app/controllers/api/membership_controller.rb"
+									todir="${sonar.webinf.dir}/app/controllers/api/"
+									overwrite="true" />
+								<copy
+									file="${patches.dir}/config/routes.rb"
+									todir="${sonar.webinf.dir}/config/"
+									overwrite="true" />
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>patch-sonar-db</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<copy
+									file="${project.build.directory}/classes/org/sonar/db/DatabaseChecker.class"
+									todir="${sonar.db.temp.dir}/org/sonar/db/"
+									overwrite="true" />
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>build-replace-sonar-db</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+							   <jar destfile="${sonar.db.jar.lib}"
+							      basedir="${sonar.db.temp.dir}/"
+							      excludes="**/README.txt">
+							   </jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>clean-tmp-directory</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+					  			<delete includeemptydirs="true">
+    								<fileset dir="${sonar.temp.dir}" includes="**/*"/>
+  								</delete>
+							</target>
+						</configuration>
+					</execution>		
+
+					<execution>
+						<id>patch-remove-plugins</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<delete>
+									<fileset dir="${sonar.bundle.dir}/lib/bundled-plugins">
+										<include name="*.jar" />
+									</fileset>
+								</delete>
+							</target>
+						</configuration>
+					</execution>
+					
+					<!-- plugins adding not downloadable from maven repository -->
+					<execution>
+						<id>patch-add-plugins</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<copy
+									file="${basedir}/src/main/resources/sonar-checkstyle-plugin-2.4.jar"
+									todir="${sonar.bundle.dir}/extensions/plugins/"
+									overwrite="true" />
+								<copy
+									file="${basedir}/src/main/resources/sonar-findbugs-plugin-3.4.3.jar"
+									todir="${sonar.bundle.dir}/extensions/plugins/"
+									overwrite="true" />
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>pack-source</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<appendAssemblyId>false</appendAssemblyId>
+							<descriptors>
+								<descriptor>src/main/assembly/assembly.xml</descriptor>
+							</descriptors>
+							<!-- Support long filenames -->
+							<tarLongFileMode>gnu</tarLongFileMode>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<scm>
+    <connection>scm:git:git@github.com:SonarQubeCommunity/sonar-findbugs.git</connection>
+    <developerConnection>scm:git:git@github.com:SonarQubeCommunity/sonar-findbugs.git</developerConnection>
+    <url>https://github.com/SonarQubeCommunity/sonar-findbugs</url>
+    <tag>3.4.3</tag>
+  </scm>
+	<dependencies>	
+		<!-- CAS plugin -->
+		<dependency>
+			<groupId>org.codehaus.sonar-plugins</groupId>
+			<artifactId>sonar-cas-plugin</artifactId>
+			<version>0.2-251113</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jasig.cas.client</groupId>
+			<artifactId>cas-client-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>xml-security</groupId>
+			<artifactId>xmlsec</artifactId>
+			<version>1.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+		</dependency>
+
+		<!-- Plugins extension - check compatibility http://docs.sonarqube.org/display/PLUG/Plugin+Version+Matrix -->
+		<dependency>
+			<groupId>org.codehaus.sonar-plugins.l10n</groupId>
+			<artifactId>sonar-l10n-fr-plugin</artifactId>
+			<version>1.13</version>
+		</dependency>
+
+		<!-- Sonar Language plugins -->
+		<dependency>
+			<groupId>org.sonarsource.java</groupId>
+			<artifactId>sonar-java-plugin</artifactId>
+			<version>4.2.1.6971</version>
+		</dependency>
+		<dependency>
+			<groupId>org.sonarsource.javascript</groupId>
+			<artifactId>sonar-javascript-plugin</artifactId>
+			<version>2.18.0.3454</version>
+		</dependency>
+		<dependency>
+			<groupId>org.sonarsource.pmd</groupId>
+			<artifactId>sonar-pmd-plugin</artifactId>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.sonarsource.sonarqube</groupId>
+			<artifactId>sonar-core</artifactId>
+			<version>${sonar.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.sonarsource.sonarqube</groupId>
+			<artifactId>sonar-server</artifactId>
+			<version>${sonar.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.sonarsource.sonarqube</groupId>
+			<artifactId>sonar-db</artifactId>
+			<version>${sonar.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+		</dependency>
+	</dependencies>
+</project>
